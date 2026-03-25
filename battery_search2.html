@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ค้นหาแบตเตอรี่รถยนต์</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2233;
+    --accent: #00d4ff;
+    --accent2: #ff6b35;
+    --green: #00e676;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --border: rgba(0,212,255,0.15);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Sarabun', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  header {
+    background: linear-gradient(135deg, #0a0e1a 0%, #111827 50%, #0d1a2e 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+  }
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 2px;
+  }
+  .logo-sub {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-weight: 400;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: -4px;
+  }
+  .header-stats {
+    margin-left: auto;
+    display: flex;
+    gap: 24px;
+  }
+  .stat {
+    text-align: right;
+  }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* Main Layout */
+  .container { max-width: 1400px; margin: 0 auto; padding: 32px 40px; }
+
+  /* Tab Nav */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 32px;
+    border: 1px solid var(--border);
+    width: fit-content;
+  }
+  .tab {
+    padding: 10px 28px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Sarabun', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--muted);
+    transition: all 0.2s;
+    border: none;
+    background: transparent;
+    letter-spacing: 0.5px;
+  }
+  .tab.active {
+    background: linear-gradient(135deg, var(--accent), #0099cc);
+    color: #000;
+    box-shadow: 0 4px 15px rgba(0,212,255,0.3);
+  }
+  .tab:hover:not(.active) { color: var(--text); background: var(--surface2); }
+
+  /* Search Box */
+  .search-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 28px;
+  }
+  .search-label {
+    font-size: 0.8rem;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .search-wrapper {
+    position: relative;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .search-icon {
+    position: absolute;
+    left: 16px;
+    color: var(--muted);
+    font-size: 1.1rem;
+    pointer-events: none;
+  }
+  input[type="text"] {
+    flex: 1;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px 14px 44px;
+    color: var(--text);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  input[type="text"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,212,255,0.1);
+  }
+  input[type="text"]::placeholder { color: var(--muted); }
+
+  .filters {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+  .filter-btn {
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn.active, .filter-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,212,255,0.08);
+  }
+  .filter-btn.brand-fb.active { border-color: #00c853; color: #00c853; background: rgba(0,200,83,0.08); }
+  .filter-btn.brand-gs.active { border-color: #2196f3; color: #2196f3; background: rgba(33,150,243,0.08); }
+  .filter-btn.brand-yuasa.active { border-color: #f44336; color: #f44336; background: rgba(244,67,54,0.08); }
+  .filter-btn.brand-3k.active { border-color: #ffc107; color: #ffc107; background: rgba(255,193,7,0.08); }
+  .filter-btn.brand-omnicraft.active { border-color: #ff9800; color: #ff9800; background: rgba(255,152,0,0.08); }
+
+  /* Results */
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .results-count {
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .results-count span { color: var(--accent); font-weight: 700; }
+
+  /* Battery Cards */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 20px;
+  }
+
+  .battery-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  }
+  .battery-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    border-color: rgba(0,212,255,0.35);
+  }
+  .card-header {
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .brand-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+  .brand-fb { background: rgba(0,200,83,0.15); color: #00c853; border: 1px solid rgba(0,200,83,0.3); }
+  .brand-gs { background: rgba(33,150,243,0.15); color: #42a5f5; border: 1px solid rgba(33,150,243,0.3); }
+  .brand-yuasa { background: rgba(244,67,54,0.15); color: #ef5350; border: 1px solid rgba(244,67,54,0.3); }
+  .brand-3k { background: rgba(255,193,7,0.15); color: #ffd54f; border: 1px solid rgba(255,193,7,0.3); }
+  .brand-omnicraft { background: rgba(255,152,0,0.15); color: #ffa726; border: 1px solid rgba(255,152,0,0.3); }
+
+  .card-model { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: var(--text); letter-spacing: 1px; }
+  .card-jis { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+  .card-type-badge {
+    margin-left: auto;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .type-hb { background: rgba(255,107,53,0.15); color: var(--accent2); border: 1px solid rgba(255,107,53,0.3); }
+  .type-mf { background: rgba(0,212,255,0.1); color: var(--accent); border: 1px solid rgba(0,212,255,0.25); }
+  .type-cv { background: rgba(156,39,176,0.15); color: #ce93d8; border: 1px solid rgba(156,39,176,0.3); }
+  .type-efb { background: rgba(0,230,118,0.12); color: #00e676; border: 1px solid rgba(0,230,118,0.3); }
+  .type-smf { background: rgba(255,235,59,0.12); color: #ffee58; border: 1px solid rgba(255,235,59,0.3); }
+
+  .card-specs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .spec-item {
+    padding: 12px 16px;
+    border-right: 1px solid var(--border);
+    text-align: center;
+  }
+  .spec-item:last-child { border-right: none; }
+  .spec-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .spec-label {
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  .card-size {
+    padding: 10px 20px;
+    font-size: 0.78rem;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 20px;
+  }
+  .card-size span { color: var(--text); }
+
+  .card-cars {
+    padding: 14px 20px;
+  }
+  .cars-title {
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .car-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-height: 120px;
+    overflow-y: auto;
+  }
+  .car-tags::-webkit-scrollbar { width: 4px; }
+  .car-tags::-webkit-scrollbar-track { background: transparent; }
+  .car-tags::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .car-tag {
+    padding: 3px 10px;
+    background: var(--surface2);
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: var(--text);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .car-tag.highlight {
+    background: rgba(0,212,255,0.12);
+    border-color: rgba(0,212,255,0.4);
+    color: var(--accent);
+  }
+  .car-count {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  /* Car Search Mode */
+  .car-result {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: border-color 0.2s;
+  }
+  .car-result:hover { border-color: rgba(0,212,255,0.3); }
+  .car-name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text);
+    min-width: 220px;
+    flex-shrink: 0;
+  }
+  .bat-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    flex: 1;
+  }
+  .bat-chip {
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .bat-chip:hover { transform: scale(1.05); }
+  .bat-chip .chip-brand { font-size: 0.68rem; opacity: 0.8; }
+  .bat-chip-fb { background: rgba(0,200,83,0.15); color: #00c853; border: 1px solid rgba(0,200,83,0.3); }
+  .bat-chip-gs { background: rgba(33,150,243,0.15); color: #42a5f5; border: 1px solid rgba(33,150,243,0.3); }
+  .bat-chip-yuasa { background: rgba(244,67,54,0.15); color: #ef5350; border: 1px solid rgba(244,67,54,0.3); }
+  .bat-chip-3k { background: rgba(255,193,7,0.15); color: #ffd54f; border: 1px solid rgba(255,193,7,0.3); }
+  .bat-chip-omnicraft { background: rgba(255,152,0,0.15); color: #ffa726; border: 1px solid rgba(255,152,0,0.3); }
+
+  /* Empty state */
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+  .empty-icon { font-size: 3rem; margin-bottom: 16px; }
+  .empty-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+
+  /* Tooltip/Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  }
+  .modal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .modal-close {
+    float: right;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1.4rem;
+    margin-top: -4px;
+  }
+  .modal-close:hover { color: var(--text); }
+
+  @media (max-width: 768px) {
+    header { padding: 16px 20px; }
+    .container { padding: 20px; }
+    .cards-grid { grid-template-columns: 1fr; }
+    .header-stats { display: none; }
+    .car-result { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">⚡ BATTERY FINDER</div>
+    <div class="logo-sub">ค้นหาแบตเตอรี่รถยนต์</div>
+  </div>
+  <div class="header-stats">
+    <div class="stat">
+      <div class="stat-num" id="total-batteries">14</div>
+      <div class="stat-label">รุ่นแบต</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="total-cars">-</div>
+      <div class="stat-label">รุ่นรถ</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">5</div>
+      <div class="stat-label">แบรนด์</div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('battery')">🔋 ค้นหาจากรุ่นแบต</button>
+    <button class="tab" onclick="switchTab('car')">🚗 ค้นหาจากรุ่นรถ</button>
+  </div>
+
+  <div class="search-section">
+    <div class="search-label" id="search-label">🔍 ค้นหารุ่นแบตเตอรี่</div>
+    <div class="search-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="พิมพ์ชื่อแบต, JIS Code, แบรนด์..." oninput="doSearch()">
+    </div>
+    <div class="filters" id="brand-filters">
+      <button class="filter-btn brand-all active" onclick="toggleBrand('all', this)">ทั้งหมด</button>
+      <button class="filter-btn brand-fb" onclick="toggleBrand('FB Battery', this)">FB Battery</button>
+      <button class="filter-btn brand-gs" onclick="toggleBrand('GS Battery', this)">GS Battery</button>
+      <button class="filter-btn brand-yuasa" onclick="toggleBrand('YUASA', this)">YUASA</button>
+      <button class="filter-btn brand-3k" onclick="toggleBrand('3K Battery', this)">3K Battery</button>
+      <button class="filter-btn brand-omnicraft" onclick="toggleBrand('Omnicraft', this)">Omnicraft</button>
+    </div>
+  </div>
+
+  <div class="results-header">
+    <div class="results-count">แสดง <span id="result-count">0</span> รายการ</div>
+  </div>
+
+  <div id="results-container"></div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" id="modal-content">
+    <button class="modal-close" onclick="document.getElementById('modal').classList.remove('show')">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+const batteries = [
+  { brand:"FB Battery", model:"F-135 R", jis:"85D31R", type:"HB", amp:85, plates:15, cca:"-", size:"304 x 171 x 201", terminal:"ขวา", terminal_size:"ใหญ่", cars:["All-New BT-50 3.0","BT-50 2.5","Dragon Eye 2.5","Frontier 2.7","Frontier 3.0","Mighty-X 2.5","TFR 2.5","TFR 2.8","Tiger D4D 2.5","Tiger D4D 3.0","Trooper 2.5","Trooper 3.0"] },
+  { brand:"FB Battery", model:"F-135 L", jis:"85D31L", type:"HB", amp:85, plates:15, cca:"-", size:"304 x 171 x 201", terminal:"ซ้าย", terminal_size:"ใหญ่", cars:["All-New Pajero Sport 2.4 2016-2022","Triton 2.4","Triton 2.5","Triton 3.2","Xenon 2.2 150 NX-PLORE","Xenon 2.2 CNG"] },
+  { brand:"FB Battery", model:"S-600 L", jis:"55B24L", type:"MF", amp:45, plates:12, cca:450, size:"237 x 127 x 201", terminal:"ซ้าย", terminal_size:"เล็ก", cars:["Civic FB 1.8","Civic FD 2.0","Corolla Altis 1.6 2014-2018","Corolla Altis 1.8 2014-2018","Corolla Altis 2.0 2014-2018","Lancer Cedia 1.6","Lancer Cedia 2.0","Livina 1.6","Mazda2 1.3 2015-2018","Mazda2 1.5 2015-2018","MX-5 2.0","New Outlander PHEV 2.4 2021-2022","Nissan Sylphy 1.6","Pulsar 1.6","Pulsar 1.8","Sienta 1.5","Swift 1.2 2012-2017","Vios 1.5 2007-2013","Vitara 1.6","Vitara 2.0","Yaris 1.2 Ativ 2017-2020"] },
+  { brand:"FB Battery", model:"S-500 L", jis:"46B19L", type:"MF", amp:35, plates:10, cca:370, size:"185 x 125 x 200", terminal:"ซ้าย", terminal_size:"เล็ก", cars:["All-New BR-V 1.5 2022","All-New Ertiga 1.5","All-New XL7 1.5","All-New Xpander 1.5","All-New Xpander Cross 1.5 2022","Attrage 1.2","Ciaz 1.2","City 1.3 2014-2019","City 1.5 2014-2019","CR-Z 1.5","Freed 1.5","Jazz 1.3 Hybrid","Jazz 1.5","Mirage 1.2","Vios 1.5 2014-2022"] },
+  { brand:"GS Battery", model:"EXTRA 120", jis:"80D31", type:"HB", amp:80, plates:15, cca:588, size:"173 x 305 x 225", terminal:"L และ R", terminal_size:"-", cars:["Colorado (2.5) 2006-2011 [L]","D-MAX (1.9 & 2.5) [L]","NAVARA [L]","VIGO (2.5 & 2.7) [L]","INNOVA (2.5 & 2.7) [L]","DRAGON EYE [R]","HIACE [R]","TFR (2.5) [R]","URVAN [R]"] },
+  { brand:"GS Battery", model:"G-175 R", jis:"80D31", type:"MF", amp:75, plates:13, cca:520, size:"173 x 305 x 225", terminal:"ขวา", terminal_size:"-", cars:["FORTUNER (2.5)","INNOVA (2.5)","MU-X (1.9 & 2.5) 2012-2019","PAJERO SPORT (2.4)","COLORADO (2.5) 2006-2011","D-MAX (1.9 & 2.5) 2002-2015","NAVARA","TRITON (2.4 & 2.5) 2014-2022","VIGO (2.5)"] },
+  { brand:"GS Battery", model:"MFX190 L", jis:"105D31", type:"MF", amp:90, plates:17, cca:710, size:"173 x 305 x 225", terminal:"ซ้าย", terminal_size:"-", cars:["FORTUNER (3.0) 2005-2015","INNOVA (2.5 & 2.7)","MU-7 (3.0)","MU-X (2.5 & 3.0)","PAJERO SPORT 2016-2022","VIGO (3.0)","BT-50 (2.5 & 3.0) 2006-2015","COLORADO Z71 (2.5 & 3.0)","D-MAX (2.5 & 3.0)","PRADO (3.0) 2012","TRITON (2.4 & 2.5 & 3.2) 2007-2022","X-TEND CAB DLS (2.2)","XENON 150 NX-PLORE (2.2)","XENON CNG (2.2)","GRAND CARNIVAL (2.2 & 2.9)"] },
+  { brand:"GS Battery", model:"MFX190 R", jis:"105D31", type:"MF", amp:90, plates:17, cca:710, size:"173 x 305 x 225", terminal:"ขวา", terminal_size:"-", cars:["ESCAPE (3.0)","EVEREST (2.5 & 3.0) 2003-2014","B2500","CAMEO (2.5)","DRAGON EYE (2.5)","FIGHTER","FRONTIER (2.7 & 3.0)","HIACE (MODIFY)","L200 STRADA","RANGER (2.5 & 3.0) 2007-2012","SPORT RIDER (2.5)","STAVIC (2.0)","STAVIC TURISMO (2.0)","TFR (2.5 & 2.8)","TIGER (2.5)","TROOPER (2.5 & 3.0)","URVAN (MODIFY)","XENON (2.2)","XENON X-TEND CAB (2.2)"] },
+  { brand:"GS Battery", model:"46B24 L", jis:"46B24", type:"MF", amp:45, plates:12, cca:421, size:"129 x 238 x 225", terminal:"ซ้าย", terminal_size:"-", cars:["ACCORD G7 (2.4) 2003-2007","ACCORD G8 (2.0 & 2.4) 2008-2012","ACCORD HYBRID (2.0) 2013-2016","ALTIS (1.6 & 1.8) 2014-2018","CITY (1.5) 2002-2010","CIVIC FB (1.8 & 2.0) 2012","CIVIC FD (2.0) 2005-2011","CR-V (2.0 & 2.4) 2012-2022","HR-V (1.8) 2015-2021","IMPREZA (1.6 & 1.8)","JIMNY (1.5) 2019-2021","LEAF EV 2022","LEGACY (2.5) 2009-2013","MAZDA 2 (1.5) 2009-2014","OUTLANDER PHEV (2.4) 2021-2024","SIENTA (1.5) 2016-2019","SWIFT (1.2) 2012-2017","SYLPHY (1.6 & 1.8) 2012","TIIDA (1.6 & 1.8) 2006","VIOS (1.5) 2007-2013","VITARA (1.6 & 2.0)","XL7 (1.5) 2020-2024","XPANDER CROSS (1.5) 2010-2021","XPANDER GT (1.5) 2010-2021","YARIS (1.5) 2006-2012","YARIS ATIV (1.2) 2017-2020","YARIS HATCHBACK (1.2) 2017-2020","YARIS STANDARD (1.2) 2012-2019"] },
+  { brand:"GS Battery", model:"MFX60 L", jis:"55B24", type:"MF", amp:50, plates:13, cca:480, size:"129 x 238 x 225", terminal:"ซ้าย", terminal_size:"-", cars:["ACCORD G7 (2.4) 2003-2007","ACCORD G8 (2.0 & 2.4) 2008-2012","ACCORD HYBRID (2.0) 2013-2016","ALTIS (1.6 & 1.8) 2014-2018","CITY (1.5) 2002-2010","CIVIC FB (1.8 & 2.0) 2012","CIVIC FD (2.0) 2005-2011","CR-V (2.0 & 2.4) 2012-2022","HR-V (1.8) 2015-2021","IMPREZA (1.6 & 1.8)","JIMNY (1.5) 2019-2021","LEAF EV 2022","LEGACY (2.5) 2009-2013","MAZDA 2 (1.5) 2009-2014","OUTLANDER PHEV (2.4) 2021-2024","SIENTA (1.5) 2016-2019","SWIFT (1.2) 2012-2017","SYLPHY (1.6 & 1.8) 2012","TIIDA (1.6 & 1.8) 2006","VIOS (1.5) 2007-2013","VITARA (1.6 & 2.0)","XL7 (1.5) 2020-2024","XPANDER CROSS (1.5) 2010-2021","XPANDER GT (1.5) 2010-2021","YARIS (1.5) 2006-2012","YARIS ATIV (1.2) 2017-2020","YARIS HATCHBACK (1.2) 2017-2020","YARIS STANDARD (1.2) 2012-2019"] },
+  { brand:"GS Battery", model:"MFX80 L", jis:"75D26", type:"MF", amp:75, plates:14, cca:590, size:"171 x 258 x 225", terminal:"ซ้าย", terminal_size:"-", cars:["Camry Esport (2.5)","Camry Hybrid 2015-2018","ES300","Escape (2.0 & 2.3) 2003-2012","Alphard","D-Max (1.9 & 2.5) 2015-2019","MPV","Navara King Cab (2.5)","Triton (2.4) Gasoline","GS250","GS300","Harrier (2.0 & 2.4) 2003-2013","Harrier (3.0) 1997-2013","Innova (2.5)","Triton (Single cab) 2014-2018","Vellfire 2014-2018","Ventury (2.7)","Vigo (2.5 & 2.7)","IS250","Juke 2013-2016","Lancer EX (1.8) 2011","Mazda 3 (1.6) 2012","RX270","RX300","Teana","Tribute"] },
+  { brand:"YUASA", model:"LN3", jis:"LN3", type:"MF", amp:75, plates:16, cca:620, size:"277 x 174 x 189", terminal:"-", terminal_size:"-", cars:["CRV","FORTUNER","INNOVA","REVO","MAJESTY","FORD: EVEREST","FORD: RANGER","MAZDA: BT50PRO","HYUNDAI: ELANTRA","HYUNDAI: TUCSON","CHEVROLET: CAPTIVA","CHEVROLET: CRUZE","CHEVROLET: COLORADO","CHEVROLET: TRIAL BLAZER","CHEVROLET: ZERFIRA","AUDI: A3","AUDI: A4","AUDI: A5","AUDI: A6","AUDI: TT","VOLVO: 940 GLE","VOLVO: 960","VOLVO: S40","VOLVO: S60","VOLVO: S80","VOLVO: S90","VOLVO: V40","VOLVO: V50","VOLVO: V60","VOLVO: V70","VOLVO: XC60","PEUGEOT: 406","PEUGEOT: 407","PEUGEOT: 607","VW: GOLF","VW: PASSAT","VW: VENTO","VW: SCIROCCO","BMW: X1","BMW: Z4","NISSAN: X-TRAIL HYBRID","BENZ: CLA200","BENZ: CLA250","BENZ: SLK R170","BENZ: SLK R171","BENZ: GLA200","BENZ: GLA250"] },
+  { brand:"3K Battery", model:"SPIDER125", jis:"70D31", type:"CV", amp:70, plates:13, cca:560, size:"170 x 303 x 224", terminal:"-", terminal_size:"-", cars:["TOYOTA TIGER (1999-2001) 2.4-3.0","MAZDA BT-50 (2010-2012) 2.5-3.0","MITSUBISHI: PAJERO SPORT (2016-2020) 2.4","MITSUBISHI: TRITON (2018-2020) 2.4-2.5","ISUZU: TFR (2002-2004) 2.5","ISUZU: DRAGON EYES (1999-2001) 2.5","ISUZU: TROOPER (2003-2005) 3.0-3.2","TATA: XENON (2018-2020) 2.2"] },
+  { brand:"3K Battery", model:"PMF50 L", jis:"50B24", type:"MF", amp:50, plates:11, cca:400, size:"127 x 236 x 222", terminal:"ซ้าย", terminal_size:"-", cars:["TOYOTA: SIENTA (2016) 1.5","TOYOTA: COROLLA ALTIS (2009-2017) 1.6-2.0","TOYOTA: YARIS (2009-2014) 1.2-1.5","TOYOTA: CELICA (1999-2001) 1.8-2.2","TOYOTA: VIOS (2007-2017) 1.5","SUBARU: IMPREZA (2018-2020) 2.0-2.5","SUBARU: LEGACY (2013-2015) 2.5","PROTON: SAVVY (2010-2012) 1.1","MITSUBISHI: LANCER (2002) 1.6-1.8","SUZUKI: VITARA (2010-2012) 2.0","SUZUKI: SWIFT (2012-2015) 1.2-1.5","SUZUKI: WAGON (2017-2019) 1.0","SUZUKI: ESTEEM (1998-2000) 1.6","NISSAN: SYLPHY (2018-2020) 1.6","NISSAN: NV (2005-2008) 1.6","NISSAN: MARCH (2010) 1.2","NISSAN: PULSAR (2014-2016) 1.6-1.8","NISSAN: LIVINA (2014-2016) 1.6","NISSAN: SUNNY (2004-2006) 1.6-1.8","MAZDA: 929 (1997) 1.8-2.0","MAZDA: 323 (2002-2004) 1.6-2.0","MAZDA: MAZDA 2 BENZINE (2018-2020) 1.3-1.5","MAZDA: MX-5 (2018-2020) 2.0","MAZDA: 626 (1998-1999) 2.0","HONDA: HR-V (2022-2024) 1.8","HONDA: ACCORD HYBRID (2013) 2.0","HONDA: CR-V (2017-2020) 1.6-2.4","HONDA: ODYSSEY (2014-2016) 2.4","HONDA: CIVIC FK HATCHBACK (2019-2021) 1.5","HONDA: STREAM (2004-2006) 2.0","HONDA: CIVIC (2012-2016) 1.5-2.0","HONDA: ACCORD (2013) 2.0-3.5","HONDA: STEPWGN SPADA (2013-2015) 2.0"] },
+  { brand:"GS Battery", model:"N-55 ISS", jis:"70B24", type:"EFB", amp:55, plates:15, cca:500, size:"129 x 238 x 225", terminal:"ซ้าย", terminal_size:"-", cars:["Accord G9 2013-2018","Civic FC (1.8) 2016-2020","Civic Hatchback FK (1.5) Turbo 2017-2019","Swift (1.2) 2018-2022","Yaris Ativ (1.2) 2017-2020","Yaris Ativ Premium (1.2) 2022","CR-V G4 2012-2016","HR-V 2014-2023","Mazda 2 (1.3) 2017-2022","Mazda 2 Skyactiv (Gasoline)","Yaris Ativ Premium Luxury 2022","Yaris Ativ SMART 2022","Yaris Ativ Sport 2022"] },
+  { brand:"3K Battery", model:"EFB-N55", jis:"80B24L", type:"EFB", amp:55, plates:"-", cca:500, size:"236 x 127 x 200 (TH224)", terminal:"ซ้าย", terminal_size:"-", cars:["Accord G9 2013-2018","Civic FC (1.8) 2016-2020","Civic Hatchback FK (1.5) Turbo 2017-2019","Swift (1.2) 2018-2022","Yaris Ativ (1.2) 2017-2020","Yaris Ativ Premium (1.2) 2022","CR-V G4 2012-2016","HR-V 2014-2023","Mazda 2 (1.3) 2017-2022","Mazda 2 Skyactiv (Gasoline)","Yaris Ativ Premium Luxury 2022","Yaris Ativ SMART 2022","Yaris Ativ Sport 2022"] },
+  { brand:"GS Battery", model:"Q-85 ISS", jis:"95D23", type:"EFB", amp:70, plates:15, cca:630, size:"173 x 232 x 225", terminal:"ซ้าย", terminal_size:"-", cars:["Almera Turbo (1.0) 2019-2022","Attrage (1.2) 2019-2022","CX-3 (2.0)","CX-30 Skyactiv (2.0)","Mazda 3 Fastback 2019-2021","Mirage (1.2) 2019-2022","Note (1.2) 2017-2022","CX-5 Gasoline (2.0) 2017-2021","CX-8 Gasoline (2.5)","Juke (1.6)","Levorg (1.6) 2019-2022","Outback (2.5) 2021-2022","WRX Wagon (2.4) 2022","Xpander (1.5) 2022-2023","March Top Series (1.2) 2010-2022","Mazda 2 Skyactiv Diesel (1.5) 2015-2022","Xpander Cross (1.5) 2022-2023","Yaris Ativ (1.2) 2019-2021"] },
+  { brand:"3K Battery", model:"SVXLN2", jis:"LN2", type:"SMF", amp:65, plates:"-", cca:540, size:"242 x 175 x 190 (TH190)", terminal:"ซ้าย/ขวา", terminal_size:"-", cars:["VOLVO: 440 (2022-2023) 2.0","TOYOTA: REVO (2015-2020) 2.4-2.8","FIAT: PUNTO (2016-2018) 1.2","FIAT: TEMPRA (1990-1996) 2.6","MG: MG3 (2015-2020) 1.5","MG: ZS (2017-2020) 1.5","MG: MG5 (2015-2019) 1.5","PEUGEOT: 405 (1998-2001) 1.6-2.0","HONDA: CIVIC (2020) 1.5","HONDA: CITY (2023-2024) 1.0","DAEWOO: CIELO (1998-2000) 1.5","DAEWOO: ESPERO (1998-2000) 1.8-2.0","DAEWOO: FANTASY (1994-1997) 1.5"] },
+  { brand:"Omnicraft", model:"55B24L", jis:"55B24", type:"SMF", amp:45, plates:"-", cca:380, size:"238 x 129 x 227", terminal:"ซ้าย", terminal_size:"-", cars:["Civic FB 1.8","Civic FD 2.0","Corolla Altis 1.6 2014-2018","Corolla Altis 1.8 2014-2018","Corolla Altis 2.0 2014-2018","Lancer Cedia 1.6","Lancer Cedia 2.0","Livina 1.6","Mazda2 1.3 2015-2018","Mazda2 1.5 2015-2018","MX-5 2.0","New Outlander PHEV 2.4 2021-2022","Nissan Sylphy 1.6","Pulsar 1.6","Pulsar 1.8","Sienta 1.5","Swift 1.2 2012-2017","Vios 1.5 2007-2013","Vitara 1.6","Vitara 2.0","Yaris 1.2 Ativ 2017-2020"] },
+  { brand:"Omnicraft", model:"LN3", jis:"LN3-MF", type:"SMF", amp:74, plates:"-", cca:720, size:"275 x 175 x 190", terminal:"ซ้าย", terminal_size:"-", cars:["CRV","FORTUNER","INNOVA","REVO","MAJESTY","FORD: EVEREST","FORD: RANGER","MAZDA: BT50PRO","HYUNDAI: ELANTRA","HYUNDAI: TUCSON","CHEVROLET: CAPTIVA","CHEVROLET: CRUZE","CHEVROLET: COROLADO","CHEVROLET: TRIAL BLAZER","CHEVROLET: ZERFIRA","AUDI: A3","AUDI: A4","AUDI: A5","AUDI: A6","AUDI: TT","VOLVO: 940 GLE","VOLVO: 960","VOLVO: S40","VOLVO: S60","VOLVO: S80","VOLVO: S90","VOLVO: V40","VOLVO: V50","VOLVO: V60","VOLVO: V70","VOLVO: XC60","PEUGEOT: 406","PEUGEOT: 407","PEUGEOT: 607","VW: GOLF","VW: PASSAT","VW: VENTO","VW: SCIROCCO","BMW: X1","BMW: Z4","NISSAN: X-TRAIL HYBRID","BENZ: CLA200","BENZ: CLA250","BENZ: SLK R170","BENZ: SLK R171","BENZ: GLA200","BENZ: GLA250"] }
+];
+
+// Count unique cars
+const allCars = new Set();
+batteries.forEach(b => b.cars.forEach(c => allCars.add(c.replace(/ \[L\]| \[R\]/g,''))));
+document.getElementById('total-cars').textContent = allCars.size;
+document.getElementById('total-batteries').textContent = batteries.length;
+
+let currentTab = 'battery';
+let activeBrand = 'all';
+let searchQuery = '';
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (tab==='battery'&&i===0)||(tab==='car'&&i===1)));
+  const label = document.getElementById('search-label');
+  const input = document.getElementById('search-input');
+  if (tab === 'battery') {
+    label.textContent = '🔍 ค้นหารุ่นแบตเตอรี่';
+    input.placeholder = 'พิมพ์ชื่อแบต, JIS Code, แบรนด์...';
+    document.getElementById('brand-filters').style.display = 'flex';
+  } else {
+    label.textContent = '🔍 ค้นหาจากรุ่นรถ';
+    input.placeholder = 'พิมพ์รุ่นรถ เช่น Vios, Fortuner, CR-V...';
+    document.getElementById('brand-filters').style.display = 'none';
+  }
+  document.getElementById('search-input').value = '';
+  searchQuery = '';
+  doSearch();
+}
+
+function toggleBrand(brand, btn) {
+  activeBrand = brand;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  doSearch();
+}
+
+function doSearch() {
+  searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
+  if (currentTab === 'battery') renderBatteries();
+  else renderCars();
+}
+
+function getBrandClass(brand) {
+  if (brand.includes('FB')) return 'fb';
+  if (brand.includes('GS')) return 'gs';
+  if (brand.includes('YUASA')) return 'yuasa';
+  if (brand.includes('3K')) return '3k';
+  if (brand.includes('Omnicraft')) return 'omnicraft';
+  return 'gs';
+}
+
+function getTypeClass(type) {
+  if (type === 'HB') return 'type-hb';
+  if (type === 'CV') return 'type-cv';
+  if (type === 'EFB') return 'type-efb';
+  if (type === 'SMF') return 'type-smf';
+  return 'type-mf';
+}
+function getTypeLabel(type) {
+  if (type === 'HB') return 'HB ไฮบริด';
+  if (type === 'CV') return 'CV แบตน้ำ';
+  if (type === 'EFB') return 'EFB Start-Stop';
+  if (type === 'SMF') return 'SMF แห้ง';
+  return 'MF กึ่งแห้ง';
+}
+
+function renderBatteries() {
+  const filtered = batteries.filter(b => {
+    const brandMatch = activeBrand === 'all' || b.brand === activeBrand;
+    if (!brandMatch) return false;
+    if (!searchQuery) return true;
+    return (
+      b.model.toLowerCase().includes(searchQuery) ||
+      b.jis.toLowerCase().includes(searchQuery) ||
+      b.brand.toLowerCase().includes(searchQuery) ||
+      b.type.toLowerCase().includes(searchQuery) ||
+      b.cars.some(c => c.toLowerCase().includes(searchQuery))
+    );
+  });
+
+  document.getElementById('result-count').textContent = filtered.length;
+  const container = document.getElementById('results-container');
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="empty"><div class="empty-icon">🔋</div><div class="empty-title">ไม่พบแบตเตอรี่ที่ตรงกับการค้นหา</div><div>ลองเปลี่ยนคำค้นหาหรือตัวกรอง</div></div>`;
+    return;
+  }
+
+  container.innerHTML = `<div class="cards-grid">${filtered.map(b => {
+    const bc = getBrandClass(b.brand);
+    const tc = getTypeClass(b.type);
+    const tl = getTypeLabel(b.type);
+    const tags = b.cars.map(c => {
+      const hl = searchQuery && c.toLowerCase().includes(searchQuery) ? ' highlight' : '';
+      return `<span class="car-tag${hl}">${c}</span>`;
+    }).join('');
+    return `
+    <div class="battery-card">
+      <div class="card-header">
+        <div>
+          <div class="brand-badge brand-${bc}">${b.brand}</div>
+          <div class="card-model">${b.model}</div>
+          <div class="card-jis">JIS: ${b.jis}</div>
+        </div>
+        <div class="card-type-badge ${tc}">${tl}</div>
+      </div>
+      <div class="card-specs">
+        <div class="spec-item"><div class="spec-val">${b.amp}A</div><div class="spec-label">แอมป์</div></div>
+        <div class="spec-item"><div class="spec-val">${b.plates}</div><div class="spec-label">แผ่น</div></div>
+        <div class="spec-item"><div class="spec-val">${b.cca}</div><div class="spec-label">CCA</div></div>
+      </div>
+      <div class="card-size">
+        <span>📐 ${b.size} mm</span>
+        <span>⚡ ขั้ว<span>${b.terminal}</span></span>
+      </div>
+      <div class="card-cars">
+        <div class="cars-title">รุ่นรถที่รองรับ (${b.cars.length} รุ่น)</div>
+        <div class="car-tags">${tags}</div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function renderCars() {
+  // Build car → battery map
+  const carMap = {};
+  batteries.forEach(b => {
+    b.cars.forEach(c => {
+      const key = c.replace(/ \[L\]| \[R\]/g, '');
+      if (!carMap[key]) carMap[key] = [];
+      if (!carMap[key].find(x => x.model === b.model && x.brand === b.brand)) {
+        carMap[key].push(b);
+      }
+    });
+  });
+
+  let entries = Object.entries(carMap).sort((a,b) => a[0].localeCompare(b[0]));
+  if (searchQuery) {
+    entries = entries.filter(([car]) => car.toLowerCase().includes(searchQuery));
+  }
+
+  document.getElementById('result-count').textContent = entries.length;
+  const container = document.getElementById('results-container');
+
+  if (entries.length === 0) {
+    container.innerHTML = `<div class="empty"><div class="empty-icon">🚗</div><div class="empty-title">ไม่พบรถที่ตรงกับการค้นหา</div><div>ลองพิมพ์ชื่อรถอื่น เช่น Vios, Fortuner, Civic...</div></div>`;
+    return;
+  }
+
+  container.innerHTML = entries.map(([car, bats]) => {
+    const chips = bats.map(b => {
+      const bc = getBrandClass(b.brand);
+      return `<div class="bat-chip bat-chip-${bc}" onclick="showBatteryDetail('${b.brand}','${b.model}')">
+        <span class="chip-brand">${b.brand}</span> ${b.model} <span style="opacity:0.7">${b.amp}A</span>
+      </div>`;
+    }).join('');
+    return `<div class="car-result">
+      <div class="car-name">🚗 ${car}</div>
+      <div class="bat-chips">${chips}</div>
+    </div>`;
+  }).join('');
+}
+
+function showBatteryDetail(brand, model) {
+  const b = batteries.find(x => x.brand === brand && x.model === model);
+  if (!b) return;
+  const bc = getBrandClass(b.brand);
+  const tags = b.cars.map(c => `<span class="car-tag">${c}</span>`).join('');
+  document.getElementById('modal-body').innerHTML = `
+    <div class="brand-badge brand-${bc}" style="display:inline-block;margin-bottom:8px">${b.brand}</div>
+    <div class="modal-title">${b.model}</div>
+    <div style="color:var(--muted);margin-bottom:20px">JIS: ${b.jis} | ${getTypeLabel(b.type)}</div>
+    <div class="card-specs" style="border-radius:10px;overflow:hidden;margin-bottom:16px;border:1px solid var(--border)">
+      <div class="spec-item"><div class="spec-val">${b.amp}A</div><div class="spec-label">แอมป์</div></div>
+      <div class="spec-item"><div class="spec-val">${b.plates}</div><div class="spec-label">แผ่น</div></div>
+      <div class="spec-item"><div class="spec-val">${b.cca}</div><div class="spec-label">CCA</div></div>
+    </div>
+    <div style="font-size:0.85rem;color:var(--muted);margin-bottom:16px">📐 ${b.size} mm &nbsp;|&nbsp; ⚡ ขั้ว${b.terminal} ${b.terminal_size !== '-' ? '(' + b.terminal_size + ')' : ''}</div>
+    <div class="cars-title" style="font-size:0.72rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:10px">รุ่นรถที่รองรับ (${b.cars.length} รุ่น)</div>
+    <div class="car-tags" style="max-height:none">${tags}</div>
+  `;
+  document.getElementById('modal').classList.add('show');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal')) {
+    document.getElementById('modal').classList.remove('show');
+  }
+}
+
+// Initial render
+renderBatteries();
+</script>
+</body>
+</html>
